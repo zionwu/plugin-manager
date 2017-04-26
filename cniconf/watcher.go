@@ -59,7 +59,7 @@ func (w *watcher) onChange(version string) error {
 	forceApply := time.Now().Sub(w.lastApplied) > reapplyEvery
 
 	for _, network := range networks {
-		if !network.Default || network.EnvironmentUUID != host.EnvironmentUUID {
+		if network.EnvironmentUUID != host.EnvironmentUUID {
 			logrus.Debugf("network: %v is not local to this environment", network.UUID)
 			continue
 		}

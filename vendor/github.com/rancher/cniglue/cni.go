@@ -2,6 +2,7 @@ package glue
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"sort"
 	"strings"
@@ -72,6 +73,15 @@ func NewCNIExec(state *DockerPluginState) (*CNIExec, error) {
 
 	if MACAddress, ok := state.Config.Labels["io.rancher.container.mac_address"]; ok {
 		c.runtimeConf.Args = append(c.runtimeConf.Args, [2]string{"MACAddress", MACAddress})
+	}
+
+	// For compatibility with Calico
+	// Calico can use this IP, because we dont want calico use Auto-assigned IP.
+	if containerIPCIDR, ok := state.Config.Labels["io.rancher.container.ip"]; ok {
+		ip, _, err := net.ParseCIDR(containerIPCIDR)
+		if err == nil {
+			c.runtimeConf.Args = append(c.runtimeConf.Args, [2]string{"IP", ip.String()})
+		}
 	}
 
 	network := state.HostConfig.NetworkMode.NetworkName()
